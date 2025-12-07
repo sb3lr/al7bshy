@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER SECURITY SCANNER</title>
+    <style>
+        /* أنماط السايبر-نيون الحالية... */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .grid-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #0f0, transparent);
+            opacity: 0.1;
+        }
+
+        .cyber-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .cyber-header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 2px solid #0f0;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-glitch {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(0, 255, 0, 0.1) 50%, transparent 70%);
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translateX(0); opacity: 0; }
+            50% { transform: translateX(10px); opacity: 0.3; }
+        }
+
+        .cyber-title {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0f0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { text-shadow: 0 0 10px #0f0; }
+            50% { text-shadow: 0 0 20px #0f0, 0 0 30px #0f0; }
+        }
+
+        .cyber-subtitle {
+            color: #0f0;
+            opacity: 0.8;
+            font-size: 1.2rem;
+        }
+
+        /* Scanner Card */
+        .scanner-card {
+            background: rgba(0, 20, 0, 0.3);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .scanner-card:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .scanner-title {
+            color: #0f0;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scanner-title::before {
+            content: '>';
+            color: #0f0;
+        }
+
+        .target-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 15px;
+            font-size: 1rem;
+            font-family: inherit;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .target-input:focus {
+            border-color: #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .cyber-button {
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-button:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0f0;
+            padding: 20px;
+            margin-top: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #0f0;
+            background: rgba(0, 20, 0, 0.1);
+        }
+
+        .result-critical {
+            border-left-color: #f00;
+            background: rgba(50, 0, 0, 0.3);
+            animation: alert-pulse 1s infinite;
+        }
+
+        @keyframes alert-pulse {
+            0%, 100% { background: rgba(50, 0, 0, 0.3); }
+            50% { background: rgba(80, 0, 0, 0.5); }
+        }
+
+        .result-high {
+            border-left-color: #ff0;
+            background: rgba(50, 50, 0, 0.3);
+        }
+
+        .result-medium {
+            border-left-color: #0ff;
+            background: rgba(0, 50, 50, 0.3);
+        }
+
+        .result-info {
+            border-left-color: #0f0;
+            background: rgba(0, 20, 0, 0.3);
+        }
+
+        .result-warning {
+            border-left-color: #ff9900;
+            background: rgba(80, 50, 0, 0.3);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 20, 0, 0.3);
+            border: 1px solid #0f0;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0f0, #0ff);
+            width: 0%;
+            transition: width 0.3s;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: scan 2s infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .status-success {
+            border-color: #0f0;
+            color: #0f0;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .status-error {
+            border-color: #f00;
+            color: #f00;
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .status-warning {
+            border-color: #ff0;
+            color: #ff0;
+            background: rgba(255, 255, 0, 0.1);
+        }
+
+        /* Scanner Grid */
+        .scanner-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .scanner-badge {
+            padding: 10px;
+            border: 1px solid;
+            border-radius: 3px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .scanner-xss { border-color: #f00; color: #f00; }
+        .scanner-sqli { border-color: #0ff; color: #0ff; }
+        .scanner-idor { border-color: #ff0; color: #ff0; }
+        .scanner-csrf { border-color: #0f0; color: #0f0; }
+
+        .scanner-badge.active {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: rgba(0, 30, 0, 0.2);
+            border: 1px solid #0f0;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .control-label {
+            color: #0ff;
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
+        .mode-select {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #0ff;
+            color: #0ff;
+            padding: 8px 12px;
+            font-family: inherit;
+            border-radius: 3px;
+            outline: none;
+            min-width: 180px;
+        }
+
+        .mode-select:focus {
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .info-note {
+            background: rgba(0, 100, 255, 0.1);
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 3px solid #00f;
+            border-radius: 3px;
+            color: #0ff;
+            font-size: 0.9rem;
+        }
+
+        .info-note strong {
+            color: #0ff;
+        }
+
+        /* Stats Summary */
+        .stats-box {
+            background: rgba(0, 20, 0, 0.3);
+            border: 1px solid #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .stats-title {
+            color: #0ff;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cyber-title { font-size: 2rem; }
+            .cyber-container { padding: 10px; }
+            .scanner-grid { grid-template-columns: 1fr; }
+            .control-group { flex-direction: column; align-items: flex-start; }
+            .mode-select { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-grid">
+        <div class="grid-line" style="top: 20%; width: 100%; height: 1px;"></div>
+        <div class="grid-line" style="top: 40%; width: 100%; height: 1px;"></div>
+        <div class="grid-line" style="top: 60%; width: 100%; height: 1px;"></div>
+        <div class="grid-line" style="top: 80%; width: 100%; height: 1px;"></div>
+    </div>
+
+    <div class="cyber-container">
+        <!-- Header -->
+        <div class="cyber-header">
+            <div class="header-glitch"></div>
+            <h1 class="cyber-title">CYBER SCAN MATRIX</h1>
+            <p class="cyber-subtitle">Unified Security Vulnerability Scanner</p>
+            <p style="margin-top: 20px; opacity: 0.7;">XSS • SQLi • IDOR • CSRF • Smart Detection</p>
+        </div>
+
+        <!-- Information Note -->
+        <div class="info-note">
+            <strong>💡 IMPORTANT:</strong> This scanner is for <strong>EDUCATIONAL PURPOSES ONLY</strong>. 
+            Some findings (like cookie security warnings) are informational and represent security 
+            best practice recommendations rather than critical vulnerabilities. Always test only 
+            websites you have permission to scan.
+        </div>
+
+        <!-- Main Scanner Card -->
+        <div class="scanner-card">
+            <h2 class="scanner-title">COMPREHENSIVE SECURITY SCAN</h2>
+            
+            <div class="scanner-grid">
+                <div class="scanner-badge scanner-xss active">XSS SCANNER</div>
+                <div class="scanner-badge scanner-sqli active">SQL INJECTION</div>
+                <div class="scanner-badge scanner-idor active">IDOR DETECTION</div>
+                <div class="scanner-badge scanner-csrf active">CSRF CHECK</div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <div class="control-group">
+                    <label class="control-label">SCAN MODE:</label>
+                    <select id="scanMode" class="mode-select">
+                        <option value="normal">🟢 Normal Scan (Balanced)</option>
+                        <option value="passive">🟡 Passive Scan (Safe)</option>
+                        <option value="aggressive">🔴 Aggressive Scan (Deep)</option>
+                    </select>
+                    <span style="color: #0ff; font-size: 0.8rem;">
+                        ⓘ Normal mode is recommended for most scans
+                    </span>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">TARGET URL:</label>
+                    <input type="text" id="targetUrl" class="target-input" 
+                           placeholder="https://example.com" 
+                           value="http://testphp.vulnweb.com">
+                </div>
+            </div>
+
+            <p style="margin: 10px 0; font-size: 0.9rem; opacity: 0.7;">
+                <strong>Recommended test sites:</strong> testphp.vulnweb.com • juice-shop.herokuapp.com
+            </p>
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+                <button class="cyber-button" id="startScan">
+                    🚀 START COMPREHENSIVE SCAN
+                </button>
+                <button class="cyber-button" id="quickTest" style="border-color: #0ff; color: #0ff;">
+                    ⚡ QUICK TEST
+                </button>
+                <button class="cyber-button" id="clearResults" style="border-color: #ff0; color: #ff0;">
+                    🗑️ CLEAR RESULTS
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div id="progressContainer" style="display: none; margin-top: 30px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="color: #0f0;">SCAN PROGRESS</span>
+                    <span id="progressText" style="color: #0ff;">0%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div id="scannerStatus" style="margin-top: 10px; color: #0ff; font-size: 0.9rem;"></div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="scanner-card">
+            <h2 class="scanner-title">SCAN RESULTS</h2>
+            
+            <div id="statusMessage" class="status-message" style="display: none;">
+                Ready to scan
+            </div>
+
+            <div class="results-panel" id="resultsPanel">
+                <div class="result-item result-info">
+                    [SYSTEM READY] Enter a target URL and click "Start Comprehensive Scan"
+                </div>
+            </div>
+
+            <!-- Stats Summary -->
+            <div class="stats-box" id="statsSummary" style="display: none;">
+                <div class="stats-title">SCAN SUMMARY</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div>
+                        <div style="color: #0ff; font-size: 0.9rem;">Vulnerabilities</div>
+                        <div id="statVulns" style="color: #0f0; font-size: 1.5rem; font-weight: bold;">0</div>
+                    </div>
+                    <div>
+                        <div style="color: #0ff; font-size: 0.9rem;">Risk Level</div>
+                        <div id="statRisk" style="color: #0f0; font-size: 1.5rem; font-weight: bold;">LOW</div>
+                    </div>
+                    <div>
+                        <div style="color: #0ff; font-size: 0.9rem;">Duration</div>
+                        <div id="statDuration" style="color: #0f0; font-size: 1.5rem; font-weight: bold;">0s</div>
+                    </div>
+                    <div>
+                        <div style="color: #0ff; font-size: 0.9rem;">Scanners</div>
+                        <div id="statScanners" style="color: #0f0; font-size: 1.5rem; font-weight: bold;">4/4</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="color: #0ff; font-size: 0.9rem;">
+                    <span id="scanIdDisplay" style="opacity: 0.7;">Scan ID: --</span>
+                </div>
+                <div>
+                    <button class="cyber-button" id="exportResults" style="padding: 10px 20px; font-size: 0.9rem;">
+                        📊 EXPORT REPORT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #0f0; opacity: 0.7;">
+            <p style="color: #0f0; font-size: 0.9rem;">
+                <strong>CYBER SECURITY SCANNER v2.0</strong><br>
+                FOR EDUCATIONAL & AUTHORIZED TESTING ONLY
+            </p>
+            <p style="font-size: 0.8rem; margin-top: 10px; color: #0ff;">
+                Developed for security research and education purposes.<br>
+                Always obtain proper authorization before scanning any website.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script>
+        // تهيئة WebSocket
+        const socket = io();
+        
+        // عناصر DOM
+        const targetInput = document.getElementById('targetUrl');
+        const scanMode = document.getElementById('scanMode');
+        const startBtn = document.getElementById('startScan');
+        const quickBtn = document.getElementById('quickTest');
+        const clearBtn = document.getElementById('clearResults');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const scannerStatus = document.getElementById('scannerStatus');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultsPanel = document.getElementById('resultsPanel');
+        const statsSummary = document.getElementById('statsSummary');
+        const exportBtn = document.getElementById('exportResults');
+        const scanIdDisplay = document.getElementById('scanIdDisplay');
+        
+        // عناصر الإحصائيات
+        const statVulns = document.getElementById('statVulns');
+        const statRisk = document.getElementById('statRisk');
+        const statDuration = document.getElementById('statDuration');
+        const statScanners = document.getElementById('statScanners');
+        
+        // حالات
+        let currentScanId = null;
+        
+        // WebSocket events
+        socket.on('connect', () => {
+            showStatus('Connected to scanner server', 'success');
+        });
+        
+        socket.on('scan_progress', (data) => {
+            updateProgress(data.progress, data.completed_scanners, data.total_scanners);
+        });
+        
+        socket.on('scan_complete', (data) => {
+            currentScanId = data.scan_id;
+            scanIdDisplay.textContent = `Scan ID: ${data.scan_id}`;
+            scanIdDisplay.style.opacity = '1';
+            showResults(data.results);
+            showStatus('Scan completed successfully!', 'success');
+            progressContainer.style.display = 'none';
+        });
+        
+        socket.on('error', (data) => {
+            showStatus('Error: ' + data.message, 'error');
+            progressContainer.style.display = 'none';
+        });
+        
+        socket.on('scan_error', (data) => {
+            showStatus('Scan error: ' + data.error, 'error');
+            progressContainer.style.display = 'none';
+        });
+        
+        // وظائف المساعدة
+        function showStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+            
+            // إخفاء الرسالة بعد 5 ثوانٍ إذا كانت نجاح
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        function updateProgress(percent, completed, total) {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = percent + '%';
+            progressText.textContent = `${Math.round(percent)}%`;
+            
+            const scanners = ['XSS', 'SQLi', 'IDOR', 'CSRF'];
+            let statusText = '';
+            for (let i = 0; i < total; i++) {
+                if (i < completed) {
+                    statusText += `✓ ${scanners[i]} `;
+                } else if (i === completed) {
+                    statusText += `▶ ${scanners[i]} `;
+                } else {
+                    statusText += `◻ ${scanners[i]} `;
+                }
+            }
+            scannerStatus.textContent = statusText;
+        }
+        
+        function showResults(results) {
+            resultsPanel.innerHTML = '';
+            statsSummary.style.display = 'block';
+            
+            if (!results.vulnerabilities || results.vulnerabilities.length === 0) {
+                const item = document.createElement('div');
+                item.className = 'result-item result-info';
+                item.innerHTML = `
+                    <strong>✅ [SECURE] No critical vulnerabilities found</strong><br>
+                    <small>The target appears to be secure or has minimal security issues.</small>
+                `;
+                resultsPanel.appendChild(item);
+            } else {
+                // عرض الثغرات
+                results.vulnerabilities.forEach(vuln => {
+                    const item = document.createElement('div');
+                    const confidence = vuln.confidence || 0;
+                    const risk = vuln.risk || 'info';
+                    
+                    // تحديد فئة النتيجة
+                    let itemClass = 'result-item ';
+                    if (risk.toLowerCase() === 'critical') {
+                        itemClass += 'result-critical';
+                    } else if (risk.toLowerCase() === 'high') {
+                        itemClass += 'result-high';
+                    } else if (risk.toLowerCase() === 'medium') {
+                        itemClass += 'result-medium';
+                    } else if (risk.toLowerCase() === 'low') {
+                        itemClass += 'result-info';
+                    } else if (risk.toLowerCase() === 'warning') {
+                        itemClass += 'result-warning';
+                    } else {
+                        itemClass += 'result-info';
+                    }
+                    
+                    item.className = itemClass;
+                    
+                    const scanner = vuln.scanner || 'SYSTEM';
+                    const type = vuln.type || 'INFO';
+                    const issue = vuln.issue || vuln.message || 'No details';
+                    const evidence = vuln.evidence ? `Evidence: ${vuln.evidence}` : '';
+                    const recommendation = vuln.recommendation ? `<br><strong>Recommendation:</strong> ${vuln.recommendation}` : '';
+                    
+                    item.innerHTML = `
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>[${scanner}] ${type}</strong>
+                            <span style="font-size: 0.8rem; opacity: 0.8;">${risk.toUpperCase()}</span>
+                        </div>
+                        <div style="margin: 5px 0; color: #ccc;">${issue}</div>
+                        ${evidence ? `<div style="font-size: 0.9rem; color: #aaa; margin: 3px 0;">${evidence}</div>` : ''}
+                        ${recommendation}
+                        <div style="margin-top: 5px; font-size: 0.8rem;">
+                            <span style="color: #0ff;">Confidence: ${(confidence * 100).toFixed(0)}%</span>
+                            ${vuln.location ? ` | <span style="color: #0f0;">Location: ${vuln.location}</span>` : ''}
+                        </div>
+                    `;
+                    
+                    resultsPanel.appendChild(item);
+                });
+            }
+            
+            // عرض الإحصائيات
+            const stats = results.summary || {};
+            const totalVulns = stats.total_vulnerabilities || 0;
+            const riskLevel = stats.overall_risk_level || 'LOW';
+            const duration = results.scan_duration ? results.scan_duration.toFixed(2) + 's' : '0s';
+            const scannersCompleted = stats.scanners_completed || 0;
+            const totalScanners = stats.total_scanners || 4;
+            
+            // تحديث الإحصائيات
+            statVulns.textContent = totalVulns;
+            statVulns.style.color = getRiskColor(riskLevel);
+            statRisk.textContent = riskLevel;
+            statRisk.style.color = getRiskColor(riskLevel);
+            statDuration.textContent = duration;
+            statScanners.textContent = `${scannersCompleted}/${totalScanners}`;
+            
+            // تحديث ألوان الإحصائيات بناءً على الخطورة
+            updateStatsColors(riskLevel);
+        }
+        
+        function getRiskColor(level) {
+            const lvl = level.toUpperCase();
+            switch(lvl) {
+                case 'CRITICAL': return '#f00';
+                case 'HIGH': return '#ff0';
+                case 'MEDIUM': return '#ff9900';
+                case 'LOW': return '#0f0';
+                case 'INFO': return '#0ff';
+                default: return '#0f0';
+            }
+        }
+        
+        function updateStatsColors(riskLevel) {
+            const color = getRiskColor(riskLevel);
+            statVulns.style.color = color;
+            statRisk.style.color = color;
+        }
+        
+        // معالجات الأحداث
+        startBtn.addEventListener('click', () => {
+            const target = targetInput.value.trim();
+            if (!target) {
+                showStatus('Please enter a target URL', 'error');
+                return;
+            }
+            
+            const mode = scanMode.value;
+            showStatus(`Starting ${mode} scan...`, 'warning');
+            
+            socket.emit('start_scan', { 
+                target: target,
+                mode: mode 
+            });
+            
+            // إعادة تعيين النتائج
+            resultsPanel.innerHTML = '<div class="result-item result-info">Scan in progress...</div>';
+            statsSummary.style.display = 'none';
+            scanIdDisplay.textContent = 'Scan ID: --';
+            scanIdDisplay.style.opacity = '0.7';
+        });
+        
+        quickBtn.addEventListener('click', async () => {
+            const target = targetInput.value.trim();
+            if (!target) {
+                showStatus('Please enter a target URL', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('Performing quick test...', 'warning');
+                
+                const response = await fetch('/api/quick-check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target: target })
+                });
+                
+                const data = await response.json();
+                
+                if (data.quick_check.reachable) {
+                    showStatus(`✅ Site is reachable (${data.quick_check.status_code})`, 'success');
+                    
+                    // عرض نتائج سريعة
+                    resultsPanel.innerHTML = `
+                        <div class="result-item result-info">
+                            <strong>⚡ Quick Test Results</strong><br>
+                            Status: ${data.quick_check.status}<br>
+                            Content Length: ${data.quick_check.content_length} bytes<br>
+                            Has Forms: ${data.quick_check.has_forms ? 'Yes' : 'No'}<br>
+                            Has Inputs: ${data.quick_check.has_inputs ? 'Yes' : 'No'}<br>
+                            <br>
+                            <em>${data.recommendation}</em>
+                        </div>
+                    `;
+                } else {
+                    showStatus(`❌ Site is unreachable: ${data.quick_check.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showStatus('Quick test failed: ' + error.message, 'error');
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            resultsPanel.innerHTML = `
+                <div class="result-item result-info">
+                    [SYSTEM READY] Enter a target URL and click "Start Comprehensive Scan"
+                </div>
+            `;
+            statsSummary.style.display = 'none';
+            scanIdDisplay.textContent = 'Scan ID: --';
+            scanIdDisplay.style.opacity = '0.7';
+            showStatus('Results cleared', 'info');
+        });
+        
+        exportBtn.addEventListener('click', () => {
+            if (!currentScanId) {
+                showStatus('No scan results to export', 'error');
+                return;
+            }
+            
+            window.open(`/api/results/${currentScanId}?format=json`, '_blank');
+            showStatus('Report download started...', 'success');
+        });
+        
+        // مثال تلقائي للموقع الآمن للاختبار
+        targetInput.addEventListener('focus', function() {
+            if (this.value === '' || this.value === 'https://example.com') {
+                this.value = 'http://testphp.vulnweb.com';
+            }
+        });
+        
+        // تحذير عند اختيار Aggressive Scan
+        scanMode.addEventListener('change', function() {
+            if (this.value === 'aggressive') {
+                showStatus('⚠️ Aggressive mode may trigger security systems. Use with caution.', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>
